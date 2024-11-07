@@ -1,0 +1,87 @@
+services:
+   nginx-proxy:
+    image: jwilder/nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs:ro
+      - vhostd:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - acme:/etc/acme.sh
+      - ./proxy.conf:/etc/nginx/conf.d/proxy.conf
+    labels:
+      - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
+
+   letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: always
+    environment:
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+    volumes:
+      - certs:/etc/nginx/certs:rw
+      - vhostd:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - acme:/etc/acme.sh
+
+   front:
+    image: nginx
+    container_name: front
+    restart: always
+    expose: 
+      - "80"
+    volumes:
+      - ./front:/usr/share/nginx/html:ro
+    environment:
+      - VIRTUAL_HOST=bot.clinicamg.com.ar
+      - LETSENCRYPT_HOST=bot.clinicamg.com.ar
+      - LETSENCRYPT_EMAIL=info@bot.clinicamg.com.ar
+    depends_on:
+      - nginx-proxy
+      - letsencrypt
+
+   backend:
+     build: ./backend
+     container_name: back
+     #networks:
+     # - scmv
+     expose: 
+      - "80"
+     environment:
+      - VIRTUAL_HOST=api.clinicamg.com.ar
+      - LETSENCRYPT_HOST=api.clinicamg.com.ar
+      - LETSENCRYPT_EMAIL=info@api.clinicamg.com.ar
+     depends_on:
+      - nginx-proxy
+      - letsencrypt
+
+   db:
+     image: postgres:12
+     container_name: data
+     restart: always
+     #networks:
+     # - scmv
+     ports: 
+      - 5434:5432
+     volumes:
+      - db-data:/var/lib/postgresql/data/pgdata
+     env_file:
+      - .env
+     environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_DB=${POSTGRES_DB?Variable not set}
+volumes:
+  db-data:
+  certs:
+  html:
+  vhostd:
+  acme:
+
+#networks:
+#  scmv:
+#    name: scmv-net
