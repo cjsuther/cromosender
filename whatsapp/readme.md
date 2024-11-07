@@ -1,7 +1,5 @@
-# SmartClaimMedicalValidation
-This project is the service main orchestration.
-Path projects includes:
-- /invoicevision
+# Cromosender Whatsapp
+This python project is to send whatsapp messages.
 
 ## How start with this project locally
 
