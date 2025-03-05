@@ -22,11 +22,13 @@ def job():
   for m in messages:
      if(m.Message.type == 'whatsapp'):
         result = sender.whatsapp_template(m.Message.template, m.Message.destination)
+        print(json.dumps(result))
         crud.update_message_status(session, m.Message.id, json.dumps(result))
+  session.close()
 
 print("process started")
 #job()
 
 while True:
     run_pending()
-    time.sleep(1)
+    time.sleep(10)
