@@ -21,7 +21,10 @@ def job():
   messages = crud.get_messages_to_send(session)
   for m in messages:
      if(m.Message.type == 'whatsapp'):
-        result = sender.whatsapp_template(m.Message.template, m.Message.destination)
+        if(m.Message.template=='custom'):
+          result = sender.whatsapp_text(m.Message.variables, m.Message.destination)
+        else:
+          result = sender.whatsapp_template(m.Message.template, m.Message.destination)
         print(json.dumps(result))
         crud.update_message_status(session, m.Message.id, json.dumps(result))
   session.close()
