@@ -10,5 +10,5 @@ def whatsapp_text(message, to):
   msg = Message(instance=messenger, content=message, to=to)
   return msg.send()
 
-def whatsapp_template(template, to, components=[]):
-  return messenger.send_template(template, recipient_id=to, components=components, lang="en_US")
+def whatsapp_template(template, to, components=[], lang='es_AR'):
+  return messenger.send_template(template, recipient_id=to, components=components, lang=lang)

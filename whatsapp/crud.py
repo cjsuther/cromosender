@@ -12,6 +12,6 @@ def get_messages_to_send(session) -> list[Message]:
     #datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))).all()
     return result
 
-def update_message_status(session, id, result):
-    session.execute(update(Message).where(Message.id == id).values({'status':'Sent', 'result':result, 'sent_time': sql.functions.now()}))
+def update_message_status(session, id, result, status):
+    session.execute(update(Message).where(Message.id == id).values({'status':status, 'result':result, 'sent_time': sql.functions.now()}))
     session.commit()

@@ -13,6 +13,7 @@ class Message(Base):
     destination = Column(String(50))
     variables = Column(Text)
     template = Column(Text)
+    template_lang = Column(Text)
     creation_time = Column(DateTime)
     schedule_time = Column(DateTime)
     sent_time = Column(DateTime)

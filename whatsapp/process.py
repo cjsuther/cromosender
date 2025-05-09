@@ -21,12 +21,19 @@ def job():
   messages = crud.get_messages_to_send(session)
   for m in messages:
      if(m.Message.type == 'whatsapp'):
-        if(m.Message.template=='custom'):
-          result = sender.whatsapp_text(m.Message.variables, m.Message.destination)
-        else:
-          result = sender.whatsapp_template(m.Message.template, m.Message.destination)
-        print(json.dumps(result))
-        crud.update_message_status(session, m.Message.id, json.dumps(result))
+        try:
+          if(m.Message.template=='custom'):
+            result = sender.whatsapp_text(m.Message.variables, m.Message.destination)
+          else:
+            result = sender.whatsapp_template(m.Message.template, m.Message.destination, m.Message.variables, m.Message.template_lang)
+          str_result = json.dumps(result)
+          if 'error' in str_result:
+            crud.update_message_status(session, m.Message.id, json.dumps(result), 'Error')
+          else:
+            crud.update_message_status(session, m.Message.id, json.dumps(result), 'Sent')
+        except Exception as e:
+          crud.update_message_status(session, m.Message.id, e, 'Error')
+           
   session.close()
 
 print("process started")
